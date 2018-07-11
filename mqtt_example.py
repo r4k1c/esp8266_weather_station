@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt
 import os
 from flask import Flask,render_template, request,json
 
-broker_address = "192.168.1.112"
+broker_address = "127.0.0.1"
 
 temp = 0
 pres = 0
