@@ -18,15 +18,15 @@
 var temp = new JustGage({
 	id: "gauge_temp",
 	value: 67,
-	min: 0,
-	max: 100,
+	min: -40,
+	max: 50,
 	title: "Temperature"
 });
 
 var pres = new JustGage({
 	id: "gauge_pres",
 	value: 67,
-	min: 0,
+	min: 800,
 	max: 1100,
 	title: "Pressure"
 });
@@ -56,7 +56,6 @@ var hum = new JustGage({
 		console.log(error);
 	},
     complete: function() {
-      console.log("Tu sam")
       setTimeout(worker, 5000);
     }
   });
