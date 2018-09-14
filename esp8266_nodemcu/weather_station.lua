@@ -1,8 +1,12 @@
+-- signal LED
+cfg_led = 12
+
 -- I2C pins
 id  = 0
 sda = 1
 scl = 2
 ret = 0
+
 -- WiFi configuration
 WIFI_SSID = "HeadQuarters"
 WIFI_PASSWORD = "no_leaf_clover"
@@ -17,7 +21,10 @@ ESP8266_GATEWAY=""
 API_key="EBL4FJ3SYXIGBPD7"
 
 -- MQTT
-broker_address = "192.168.1.112"
+node_name = "weather_imp_1"
+
+broker_address = "192.168.1.11"
+broker_port = 1883
 node_id = "node1"
 main_topic = "weather"
 temp_topic = "temp"
@@ -74,6 +81,7 @@ function sensor_read()
 end
 
 function loop()
+    gpio.write(cfg_led, gpio.HIGH)
     print("IP and shit:", wifi.sta.getip())
     print("Status:", wifi.sta.status())
     
@@ -86,6 +94,8 @@ function loop()
         m:publish(main_topic .. "/" .. node_id .. "/" .. pres_topic, P, 0, 0);
         m:publish(main_topic .. "/" .. node_id .. "/" .. hum_topic, H, 0, 0);
     end
+
+    gpio.write(cfg_led, gpio.LOW)
 end
 
 function wifi_connected()
@@ -104,13 +114,16 @@ function periodic_pub()
 end
 
 function mqtt_start()
-    m = mqtt.Client("kurac", 120)
+    m = mqtt.Client(node_name, 120)
     -- register message callback beforehand
     m:on("connect", function(client) print ("connected") end)
     m:on("offline", function(client) print ("offline") end)
     -- Connect to broker
-    m:connect("192.168.1.112", 1883, function(client) periodic_pub() end) 
+    m:connect(broker_address, broker_port, function(client) periodic_pub() end) 
 end
+
+gpio.mode(cfg_led, gpio.OUTPUT)
+gpio.write(cfg_led, gpio.LOW)
 
 station_cfg={}
 station_cfg.ssid=WIFI_SSID
