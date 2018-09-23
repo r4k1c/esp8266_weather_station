@@ -1,6 +1,7 @@
 import paho.mqtt.client as mqtt
 import os
 from flask import Flask,render_template, request,json
+from Tkinter import *
 
 broker_address = "127.0.0.1"
 
@@ -56,6 +57,13 @@ def signUpUser():
 def gumbek():
 	print "AJAX Temperature: ", temp
 	return json.dumps({'temp':temp, 'pres':pres, 'hum':hum})
+
+master = Tk()
+print "Tu sam"
+t_slide = Scale(master, from_=0, to=50)
+t_slide.pack()
+
+mainloop()
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
