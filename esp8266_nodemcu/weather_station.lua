@@ -7,23 +7,15 @@ sda = 1
 scl = 2
 ret = 0
 
--- WiFi configuration
-WIFI_SSID = "HeadQuarters"
-WIFI_PASSWORD = "no_leaf_clover"
-WIFI_SIGNAL_MODE = wifi.PHYMODE_N
-
--- IP config
-ESP8266_IP=""
-ESP8266_NETMASK=""
-ESP8266_GATEWAY=""
-
--- Thingspeak
-API_key="EBL4FJ3SYXIGBPD7"
-
--- MQTT
 node_name = "weather_imp_1"
 
-broker_address = "192.168.1.11"
+-- WiFi configuration
+wifi_ssid = "HeadQuarters"
+wifi_pass = "no_leaf_clover"
+WIFI_SIGNAL_MODE = wifi.PHYMODE_N
+
+-- MQTT
+broker_addr = "192.168.1.11"
 broker_port = 1883
 node_id = "node1"
 main_topic = "weather"
@@ -119,15 +111,60 @@ function mqtt_start()
     m:on("connect", function(client) print ("connected") end)
     m:on("offline", function(client) print ("offline") end)
     -- Connect to broker
-    m:connect(broker_address, broker_port, function(client) periodic_pub() end) 
+    m:connect(broker_addr, broker_port, function(client) periodic_pub() end) 
 end
+
+function param_update()
+    file_obj = file.open("conf.json", "r")
+
+    if file_obj ~= nil 
+    then
+        file_data = file.read()
+        data = sjson.decode(file_data)
+        
+        if data["wifi_ssid"] ~= nil
+        then
+            wifi_ssid = data["wifi_ssid"]
+        end
+
+        if data["wifi_pass"] ~= nil
+        then
+            wifi_pass = data["wifi_pass"]
+        end
+
+        if data["broker_addr"] ~= nil
+        then
+            broker_addr = data["broker_addr"]
+        end
+
+        if data["broker_port"] ~= nil
+        then
+            broker_port = tonumber(data["broker_port"])
+        end
+
+        if data["node_name"] ~= nil
+        then
+            node_id = data["node_name"]
+        end
+
+        print("WiFi SSID: ", wifi_ssid)
+        print("WiFi password: ", wifi_pass)
+        print("Broker address: ", broker_addr)
+        print("Broker port: ", broker_port)
+        print("Node ID: ", node_id)
+    end
+end
+
+-- START !!!
+
+param_update()
 
 gpio.mode(cfg_led, gpio.OUTPUT)
 gpio.write(cfg_led, gpio.LOW)
 
 station_cfg={}
-station_cfg.ssid=WIFI_SSID
-station_cfg.pwd=WIFI_PASSWORD
+station_cfg.ssid=wifi_ssid
+station_cfg.pwd=wifi_pass
 station_cfg.save=true
 
 wifi.setmode(wifi.STATION) 
@@ -135,6 +172,3 @@ wifi.setphymode(WIFI_SIGNAL_MODE)
 wifi.sta.config(station_cfg) 
 wifi.sta.connect(wifi_connected())
 
--- mytimer = tmr.create()
--- mytimer:register(3000, tmr.ALARM_AUTO, loop)
--- mytimer:start()

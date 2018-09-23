@@ -36,7 +36,7 @@ function print_table(table)
     end
 end
 
-function SendHTML(sck) -- Send LED on/off HTML page
+function SendHTML(sck)
     file.open("configurator.html")
     htmlstring = file.read()
     sck:send(htmlstring)
@@ -49,20 +49,29 @@ end
 function save_to_json(data)
     a = {}
 
--- what if pass contains =
+    -- what if pass contains =
     for i,t in ipairs(data) do
         b = split_string(t, '=')
         a[b[1]] = b[2]
     end
 
-    print("Dick: ", a)
+    print("table a: ", a)
 
     json = sjson.encode(a)
-    print(json)
+    print("JSON is: ", json)
+
+    --write parameters to conf file
+    file.remove("conf.json")
+    file.open("conf.json", "w+")
+    file.write(json)
+
+    print("Successful config update")
 end
 
 function receiver(sck, data)
-    a = string.match(data, "?(.-%s)")
+    print("String1: ", data)
+    a = string.match(data, "?(.-)%s")
+    print("String2: ", a)
     if a ~= nil
     then
         b = split_string(a,'&')
@@ -88,9 +97,6 @@ gpio.mode(cfg_led, gpio.OUTPUT)
 gpio.write(cfg_led, gpio.HIGH)
 
 server = net.createServer(net.TCP) -- create TCP server
-
-b = split_string("jebeno,kaj,koji,kurac", ',')
-print_table(b)
 
 if server then
   server:listen(80, function(conn)-- listen to the port 80
